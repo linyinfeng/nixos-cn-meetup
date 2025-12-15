@@ -90,9 +90,9 @@
 
     可以处理 `nix-env`/`nix profile`，NixOS system，home-manager，等等。
 
-  2. #emoji.star 管理临时 GC roots。
+  2. #emoji.star 管理项目使用的临时 GC roots。
 
-    包括 `nix-build`/`nix build`, nix-direnv 产生的 GC roots。
+    包括 `nix-build`/`nix build`, nix-direnv 产生的 GC roots，等等。
 
   3. #emoji.screwdriver 所有策略*高度可定制*。
 
@@ -372,23 +372,23 @@
 
   NixOS options：
 
-  - `man configuration.nix` 并搜索 anggr。
+  - `man configuration.nix` 并搜索 angrr。
   - #link(
       "https://search.nixos.org/options?channel=unstable&query=angrr",
     )[NixOS Search - Options - angrr]
 ]
 
 #slide[
-  == 杂谈 - anggr 与 nix-direnv
+  == 杂谈 - angrr 与 nix-direnv
 
   #v(1em)
 
   nix-direnv 在 #link("https://github.com/nix-community/nix-direnv/pull/631")[#631] 中加入了自动 touch `.direnv` 中的 GC roots 的功能。
 
   #only(1)[
-    - 因此 nix-sweep 和 `nh clean` 对 `.direnv` 也能达到类似 anggr 的效果了。
+    - 因此 nix-sweep 和 `nh clean` 对 `.direnv` 也能达到类似 angrr 的效果了。
 
-    - 不同的是，nix-direnv 只 touch 它创建的 GC roots，而 anggr touch 项目目录中的所有 GC roots，且可配置。
+    - 不同的是，nix-direnv 只 touch 它创建的 GC roots，而 angrr touch 项目目录中的所有 GC roots，且可配置。
   ]
   #only(2)[
     - 这个 PR 是 10 月 27 日提交的，直到做这个幻灯片时我才知道 #emoji.face.think。
@@ -428,11 +428,11 @@
 ]
 
 #slide[
-  == 杂谈 - 开发趣事
+  == 杂谈 - angrr 与 Nixpkgs
 
   #v(1em)
 
-  0.2.0 版本前，anggr 只专注于管理 `result`/`.direnv` 相关的临时 GC roots。
+  0.2.0 版本前，angrr 只专注于管理 `result`/`.direnv` 相关的临时 GC roots。
 
   - 用户多了后，有用户希望它也能管理 profile#footnote[#link("https://github.com/linyinfeng/angrr/issues/30")]，因此我又加了一堆功能，演变成了现在的样子，既可以有 `temporary-root-policies` 有可以有 `profile-policies`，且高度可配置。
 ]
