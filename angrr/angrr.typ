@@ -232,7 +232,7 @@
   {
     services.angrr = {
       enable = true;
-      config = { ... };
+      settings = { ... };
     };
     nix.gc.automatic = true;
     programs.direnv.enable = true;
@@ -243,12 +243,12 @@
 #slide[
   == 示例 - 临时 GC roots
 
-  在 `config` 中定义你想要的清理策略。
+  在 `settings` 中定义你想要的清理策略。
 
   #set text(size: .9em)
 
   ```nix
-  config = {
+  settings = {
     temporary-root-policies = {
       direnv = {
         path-regex = "/\\.direnv/";
@@ -267,7 +267,7 @@
   #set text(size: .9em)
 
   ```nix
-  config = {
+  settings = {
     temporary-root-policies = {
       result = {
         path-regex = "/result[^/]*$";
@@ -285,7 +285,7 @@
 
   #text(size: .8em)[
     ```nix
-    config.profile-policies = {
+    settings.profile-policies = {
       system = {
         profile-paths = [ "/nix/var/nix/profiles/system" ];
         keep-since = "2weeks";
@@ -307,7 +307,7 @@
 
   #text(size: .8em)[
     ```nix
-    config.profile-policies = {
+    settings.profile-policies = {
       user = {
         profile-paths = [
           "~/.local/state/nix/profiles/profile"
@@ -331,7 +331,7 @@
   #set text(size: .9em)
 
   ```nix
-  config.touch = {
+  settings.touch = {
     project-globs = [
       "!.git"
       "!target" "!node_modules"
