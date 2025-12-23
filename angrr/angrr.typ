@@ -90,7 +90,7 @@
 
     可以处理 `nix-env`/`nix profile`，NixOS system，home-manager，等等。
 
-  2. #emoji.star 管理项目使用的临时 GC roots。
+  2. 管理项目使用的临时 GC roots。
 
     包括 `nix-build`/`nix build`, nix-direnv 产生的 GC roots，等等。
 
@@ -129,7 +129,43 @@
 ]
 
 #slide[
-  == 常见 GC Roots 来源
+  == Nix 如何查找 GC root
+
+
+  #set text(size: .9em)
+
+  ```bash
+  nix-store --gc --print-roots
+  ```
+
+  Nix 做垃圾回收时使用的 GC roots 分两部分：
+
+  1. 运行时 GC roots，来自 procfs。
+     - `/proc/*/{exe,maps,environ,cwd,fd/*}`
+     - `/proc/sys/kernel/{modprobe,fbsplash,poweroff_cmd}`
+
+  2. 磁盘上的 GC roots，位于 `/nix/var/nix/{gcroots,profiles}` 目录#footnote[其实还有神秘的 `/nix/var/nix/temproots`。]下。
+     - 递归查找该目录下的所有符号链接，指向的 store path #footnote[名字与 store path 相同的空文件也是 GC root，hydra 会创建这样的文件。]都是 GC roots
+]
+
+#slide[
+  == 程序如何创建 GC root
+
+  ```bash
+  nix build nixpkgs#hello --out-link result
+  ```
+
+  1. 创建软链接指向 store path
+
+     `./result -> /nix/store/2bcv91i...-hello-2.12.2`
+
+  2. 在 `/nix/var/nix/gcroots/auto` 中创建软链接指向 out link
+
+     `/nix/var/nix/gcroots/auto/l1zcgxj... -> $PWD/result`
+]
+
+#slide[
+  == 常见 "auto" GC Roots 来源
 
 
   #codly(number-format: none)
@@ -206,9 +242,7 @@
 
   - 虽然你每天都在这个 flake 下工作，但环境已经很久很久没有变更了。
 
-  - nix-sweep 和 `nh clean` 都根据 GC roots 的*修改时间*来清理它们。
-
-  - 所以这种一直被使用，但很久没变更的开发环境就会被清理掉 #emoji.face.sweat。
+  - 如果根据 GC roots 的*修改时间*来清理它们，这种一直被使用，但很久没变更的开发环境就会被清理掉 #emoji.face.sweat。
 ]
 
 #slide[
@@ -372,7 +406,7 @@
 
   NixOS options：
 
-  - `man configuration.nix` 并搜索 angrr。
+  - `man configuration.nix` 并按 `/` 搜索 angrr。
   - #link(
       "https://search.nixos.org/options?channel=unstable&query=angrr",
     )[NixOS Search - Options - angrr]
@@ -383,7 +417,7 @@
 
   #v(1em)
 
-  nix-direnv 在 #link("https://github.com/nix-community/nix-direnv/pull/631")[#631] 中加入了自动 touch `.direnv` 中的 GC roots 的功能。
+  nix-direnv 在 #link("https://github.com/nix-community/nix-direnv/pull/631")[PR \#631] 中加入了自动 touch `.direnv` 中的 GC roots 的功能。
 
   #only(1)[
     - 因此 nix-sweep 和 `nh clean` 对 `.direnv` 也能达到类似 angrr 的效果了。
@@ -423,7 +457,7 @@
       #image("images/25-11-release-notes.png", width: 80%)
     ]
 
-    如果想 NixOS 模块火起来，就取个 "a" 开头的名字贡献加到 nixpkgs 吧 #emoji.face.wink（不是
+    如果想你的软件火起来，就取个 "a" 开头的名字贡献加到 nixpkgs 吧 #emoji.face.wink（不是
   ]
 ]
 
@@ -434,7 +468,7 @@
 
   0.2.0 版本前，angrr 只专注于管理 `result`/`.direnv` 相关的临时 GC roots。
 
-  - 用户多了后，有用户希望它也能管理 profile#footnote[#link("https://github.com/linyinfeng/angrr/issues/30")]，因此我又加了一堆功能，演变成了现在的样子，既可以有 `temporary-root-policies` 有可以有 `profile-policies`，且高度可配置。
+  - 用户多了后，有用户希望它也能管理 profile#footnote[#link("https://github.com/linyinfeng/angrr/issues/30")]，因此我又加了一堆功能，演变成了现在的样子，既可以有 `temporary-root-policies` 又可以有 `profile-policies`，且高度可配置。
 ]
 
 #slide[
@@ -442,9 +476,9 @@
 
   #v(1em)
 
-  angrr 其实能反映出我一些软件开发上的风格。我倾向于做通用可配置的工具，然后可能提供一个不错的示例配置，不对用户的使用场景做过多假设。
+  我比较倾向于做通用可配置的工具，然后可能提供一个不错的示例配置，不对用户的使用场景做过多假设。
 
-  这也是 angrr 有些不同于 nix-sweep 和 `nh clean` 的地方，也是为什么有了这两个工具，我仍然觉得可以讲讲 angrr 的原因。
+  这也是 angrr 有些不同于 nix-sweep 和 `nh clean` 的地方，也是为什么有了这两个工具，我仍然没有删库跑路，并觉得可以讲讲 angrr 的原因。
 ]
 
 #slide[
@@ -452,9 +486,7 @@
 
   #v(1em)
 
-  类似的还有 NixOS CN 群里的 commit-notifier#footnote[#link("https://github.com/linyinfeng/commit-notifier")]，虽然它的主要任务是发送与 Nixpkgs 相关的通知，但它其实非常通用，没有任何与 Nixpkgs 耦合的地方。可以通过配置用它发送任何 GitHub 仓库的通知，比如大家也很关心的 #link("https://github.com/nixos/nix")[nixos/nix]。
-
-  #show: later
+  类似的还有 NixOS CN 群里的 commit-notifier#footnote[#link("https://github.com/linyinfeng/commit-notifier")]，虽然它的主要任务是发送与 Nixpkgs 相关的通知，但它其实非常通用，没有任何与 Nixpkgs 耦合的地方。可以通过配置用它发送任何 GitHub 仓库的通知#footnote[可以联系 bot 的管理员（我）添加仓库，或者部署自己的 bot。]，比如大家也很关心的 #link("https://github.com/nixos/nix")[nixos/nix]。
 
   #align(horizon + center)[
     可能实际上并没有人注意到过这一点 #emoji.face.think
@@ -462,7 +494,35 @@
 ]
 
 #slide[
-  == 杂谈 - Nix GC Roots 面临的问题
+  == 杂谈 - 国际化
+
+  #v(1em)
+
+  #set text(size: .9em)
+
+  之前 angrr 的 direnv 脚本中有这么一句：
+
+  ```bash
+  runtime_formatted=$(printf "%.3f" "$runtime")
+  ```
+
+  `"$runtime"` 将被 bash 展开为形如 `0.027721948` 的字符串。
+
+  #align(center)[你能看出问题所在吗？]
+
+  #show: later
+
+  在德语系统上这段代码就会出问题（#link("https://github.com/linyinfeng/angrr/issues/36")[linyinfeng/angrr\#36]）：
+
+  ```shell
+  $ LC_ALL=de_DE.UTF-8 printf "%.3f" 0.027721948
+  bash: printf: 0.27721948: Ungültige Zahl.
+  0,000
+  ```
+]
+
+#slide[
+  == 杂谈 - Nix GC 的一些问题
 
   #v(1em)
 
@@ -470,7 +530,7 @@
 
   最后，在开发 angrr 的过程中，我也意识到 Nix 在 GC 上存在的一些问题：
 
-  #align(center)[并非所有的 GC roots 在 GC 时都总是可见]
+  #align(center)[1. 并非所有的 GC roots 在 GC 时都总是可见]
 
   为什么这对单机来说是一个问题？难道 GC roots 能长腿跑了么？
 
@@ -479,6 +539,25 @@
   - 比如，有些用户可能想要加密自己的 home 目录；甚至 systemd-homed 默认就加密用户的 home 目录。
   - 一旦用户登出，home 目录被卸载，用户的 GC roots 就无法被 Nix 访问到了。
   - 这种情况下执行 `nixos-collect-garbage` 会回收用户想要保留的 store path #emoji.face.sad。
+]
+
+#slide[
+  == 杂谈 - Nix GC 的一些问题
+
+  #v(1em)
+
+  #set text(size: .9em)
+
+  最后，在开发 angrr 的过程中，我也意识到 Nix 在 GC 上存在的一些问题：
+
+  #align(center)[2. 混乱的 GC roots 根组织（小问题）]
+
+  我们已经提过，Nix 会在 `/nix/var/nix/{gcroots,profiles}` 下查找 GC roots。但实际上 `profiles` 本来就有一个软链接在 `gcroots` 目录下：
+  #align(center)[`/nix/var/nix/gcroots/profiles -> /nix/var/nix/profiles`]
+
+  并且你会发现，所有的 profile generation 的 GC roots 还会同时出现在 `/nix/var/nix/auto` 目录下。
+
+  一个 profile generation 会在各种地方被 Nix GC 看到三次，何意味。
 ]
 
 #slide[
