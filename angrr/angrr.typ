@@ -117,6 +117,12 @@
 ]
 
 #slide[
+  #set align(center + horizon)
+
+  #image("images/survey.png", height: 100%)
+]
+
+#slide[
   == 为什么有 GC，`/nix/store` 还是这么大？
 
   #v(1em)
@@ -145,7 +151,7 @@
      - `/proc/sys/kernel/{modprobe,fbsplash,poweroff_cmd}`
 
   2. 磁盘上的 GC roots，位于 `/nix/var/nix/{gcroots,profiles}` 目录#footnote[其实还有神秘的 `/nix/var/nix/temproots`。]下。
-     - 递归查找该目录下的所有符号链接，指向的 store path #footnote[名字与 store path 相同的空文件也是 GC root，hydra 会创建这样的文件。]都是 GC roots
+     - 递归查找该目录下的所有符号链接，指向的 store path #footnote[名字与 store path 相同的空文件也是 GC root，hydra 会创建这样的文件。] 都是 GC roots
 ]
 
 #slide[
@@ -165,7 +171,7 @@
 ]
 
 #slide[
-  == 常见 "auto" GC Roots 来源
+  == 常见 GC Roots 来源
 
 
   #codly(number-format: none)
