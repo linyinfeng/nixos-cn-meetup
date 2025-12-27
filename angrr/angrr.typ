@@ -116,11 +116,11 @@
   ))
 ]
 
-#slide[
-  #set align(center + horizon)
+// #slide[
+//   #set align(center + horizon)
 
-  #image("images/survey.png", height: 100%)
-]
+//   #image("images/survey.png", height: 100%)
+// ]
 
 #slide[
   == 为什么有 GC，`/nix/store` 还是这么大？
@@ -556,12 +556,12 @@
 
   最后，在开发 angrr 的过程中，我也意识到 Nix 在 GC 上存在的一些问题：
 
-  #align(center)[2. 混乱的 GC roots 根组织（小问题）]
+  #align(center)[2. 混乱的 GC roots 组织（小问题）]
 
   我们已经提过，Nix 会在 `/nix/var/nix/{gcroots,profiles}` 下查找 GC roots。但实际上 `profiles` 本来就有一个软链接在 `gcroots` 目录下：
   #align(center)[`/nix/var/nix/gcroots/profiles -> /nix/var/nix/profiles`]
 
-  并且你会发现，所有的 profile generation 的 GC roots 还会同时出现在 `/nix/var/nix/auto` 目录下。
+  并且你会发现，所有的 profile generation 的 GC roots 还会同时出现在 `/nix/var/nix/gcroots/auto` 目录下。
 
   一个 profile generation 会在各种地方被 Nix GC 看到三次，何意味。
 ]
