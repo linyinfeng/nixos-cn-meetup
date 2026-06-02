@@ -58,7 +58,7 @@
   #set align(horizon)
   #grid(columns: 2, gutter: 2cm)[
     #align(center)[
-      #text(size: 1.2em)[Yinfeng]
+      #text(size: 1.2em)[*Yinfeng*]
 
       #v(10pt, weak: true)
       #image("images/yinfeng-qrcode.svg", width: 8cm)
