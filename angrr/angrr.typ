@@ -61,7 +61,7 @@
       #text(size: 1.2em)[*Yinfeng*]
 
       #v(10pt, weak: true)
-      #image("images/yinfeng-qrcode.svg", width: 8cm)
+      #image("../common/images/yinfeng-qrcode.svg", width: 8cm)
       #v(10pt, weak: true)
       #link("https://github.com/linyinfeng")[github.com/linyinfeng]
     ]
