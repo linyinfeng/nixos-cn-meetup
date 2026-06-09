@@ -4,7 +4,7 @@
 
 #set page(paper: "presentation-16-9")
 #set text(size: 23pt, font: ("Source Sans 3", "Source Han Sans SC"))
-#show raw: set text(size: 1.1em, font: ("Sarasa Mono Slab SC"))
+#show raw: set text(size: 1.1em, font: "Sarasa Mono Slab SC")
 
 #show link: set text(fill: blue.darken(25%))
 
@@ -16,13 +16,17 @@
 }
 
 #let rainbow(body) = text(fill: gradient.linear(..color.map.rainbow), box(body))
-#let rainbow-highlight(body) = highlight(fill: gradient.linear(
+#let rainbow-highlight(body) = highlight(
+  fill: gradient.linear(
     (rgb(124, 213, 255), 0%),
     (rgb(166, 251, 202), 33%),
     (rgb(255, 243, 124), 66%),
     (rgb(255, 164, 157), 100%),
     angle: -7deg,
-  ), radius: 0.25em, body)
+  ),
+  radius: 0.25em,
+  body,
+)
 
 #let date = datetime(
   year: 2026,
@@ -105,8 +109,12 @@
 
   + 增进大家对 Nix binary cache 的了解
   + 向大家介绍我写的两个简单的小工具：
-    - #link("https://github.com/linyinfeng/nix-cache-overlay")[`github:linyinfeng/nix-cache-overlay`]
-    - #link("https://github.com/linyinfeng/nix-gc-s3")[`github:linyinfeng/nix-gc-s3`]
+    - #link(
+        "https://github.com/linyinfeng/nix-cache-overlay",
+      )[`github:linyinfeng/nix-cache-overlay`]
+    - #link(
+        "https://github.com/linyinfeng/nix-gc-s3",
+      )[`github:linyinfeng/nix-gc-s3`]
   + 抛砖引玉
 ]
 
@@ -126,7 +134,9 @@
       ```
   ]
 
-  #let example-hash = text(fill: green.darken(25%))[`zi2bj2hlavv8q743li2s9diqbcpmrf9b`]
+  #let example-hash = text(
+    fill: green.darken(25%),
+  )[`zi2bj2hlavv8q743li2s9diqbcpmrf9b`]
   #let example-narinfo = [#example-hash#text(fill: orange)[*`.narinfo`*]]
 
   #only(2)[
@@ -139,23 +149,23 @@
   ]
 
   #only(3)[
-      #set text(size: 0.9em)
-      `curl `#link("https://cache.nixos.org/zi2bj2hlavv8q743li2s9diqbcpmrf9b.narinfo")[`https://cache.nixos.org/`#example-narinfo]
+    #set text(size: 0.9em)
+    `curl `#link("https://cache.nixos.org/zi2bj2hlavv8q743li2s9diqbcpmrf9b.narinfo")[`https://cache.nixos.org/`#example-narinfo]
 
-      #set text(size: .78em)
+    #set text(size: .78em)
 
-      ```txt
-      StorePath: /nix/store/zi2bj2hlavv8q743li2s9diqbcpmrf9b-hello-2.12.3
-      URL: nar/1zzwzcsbpsghsbfjdw416dgmfankjs4chksx1cic1p1z8v6vr0s8.nar.xz
-      Compression: xz
-      FileHash: sha256:1zzwzcsbpsghsbfjdw416dgmfankjs4chksx1cic1p1z8v6vr0s8
-      FileSize: 58480
-      NarHash: sha256:0vwm6sr61cx6hydqlx3phhg1a0830k61dbfwqlkhilkpcbppjmdw
-      NarSize: 279624
-      References: 57iz36553175g3178pvxjij8z5rcsd4n-glibc-2.42-61 zi2bj2hlavv8q743li2s9diqbcpmrf9b-hello-2.12.3
-      Deriver: 67mdzby3g0maqqp93xj03rc99nnrpdp9-hello-2.12.3.drv
-      Sig: cache.nixos.org-1:DwOHEUMyxq4aUrwzcZJrPPqqlImdA7042VJ+HWOnyjZeBMaKkSQxFS2vArnR...
-      ```
+    ```txt
+    StorePath: /nix/store/zi2bj2hlavv8q743li2s9diqbcpmrf9b-hello-2.12.3
+    URL: nar/1zzwzcsbpsghsbfjdw416dgmfankjs4chksx1cic1p1z8v6vr0s8.nar.xz
+    Compression: xz
+    FileHash: sha256:1zzwzcsbpsghsbfjdw416dgmfankjs4chksx1cic1p1z8v6vr0s8
+    FileSize: 58480
+    NarHash: sha256:0vwm6sr61cx6hydqlx3phhg1a0830k61dbfwqlkhilkpcbppjmdw
+    NarSize: 279624
+    References: 57iz36553175g3178pvxjij8z5rcsd4n-glibc-2.42-61 zi2bj2hlavv8q743li2s9diqbcpmrf9b-hello-2.12.3
+    Deriver: 67mdzby3g0maqqp93xj03rc99nnrpdp9-hello-2.12.3.drv
+    Sig: cache.nixos.org-1:DwOHEUMyxq4aUrwzcZJrPPqqlImdA7042VJ+HWOnyjZeBMaKkSQxFS2vArnR...
+    ```
   ]
 
   #only(4)[
@@ -311,14 +321,16 @@
 
   #v(1em)
 
-  #link("https://github.com/linyinfeng/nix-cache-overlay")[`github:linyinfeng/nix-cache-overlay`]
+  #link(
+    "https://github.com/linyinfeng/nix-cache-overlay",
+  )[`github:linyinfeng/nix-cache-overlay`]
 
-  #only((1,3))[
+  #only((1, 3))[
     做两件事：
 
     1. 把 `narinfo` 的 `GET`/`HEAD` 请求转发到上游 cache
-       - 上游返回 200 $->$ 返回给客户端
-       - 上游返回 404 $->$ 尝试下一个上游
+      - 上游返回 200 $->$ 返回给客户端
+      - 上游返回 404 $->$ 尝试下一个上游
 
     2. 所有上游都 404 $->$ 认证后签上 SigV4 签名，转发到 S3 服务器
   ]
