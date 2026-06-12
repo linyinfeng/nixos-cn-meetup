@@ -1,8 +1,9 @@
-#import "@preview/polylux:0.4.0": *
-#import "@preview/simplebnf:0.2.0": *
-#import "@preview/pinit:0.2.2": *
-#import "@preview/tdtr:0.5.5": *
-#import "@preview/ctheorems:1.1.3": *
+#import "@preview/polylux:0.4.0": slide, later, uncover, only
+#import "@preview/simplebnf:0.2.0": bnf, Prod, Or
+#import "@preview/tdtr:0.5.5": tidy-tree-graph
+#import "@preview/ctheorems:1.1.3": thmrules
+#import "@preview/curryst:0.6.0": rule, prooftree, rule-set
+#import "@preview/fletcher:0.5.8": diagram, node, edge
 
 #set page(paper: "presentation-16-9")
 #show heading: set block(below: 1em)
@@ -67,19 +68,22 @@
 #let lc = [$lambda$-演算]
 #let step(subscript) = $attach(arrow.r, br: #subscript)$
 #let steps(subscript) = $attach(arrow.r, tr: "*", br: #subscript)$
-#let app-node = [app]
+#let app-node = [@]
 #let important(..args) = text(fill: blue, weight: 600, ..args)
 #let warning(..args) = text(fill: red, weight: 600, ..args)
+#let mathimportant(body, ..args) = text(fill: blue, ..args, math.underline(body))
 #let doalpha(body, ..args) = text(fill: green, ..args, math.underline(body))
 #let dobeta(body, ..args) = text(fill: blue, ..args, math.underline(body))
 #let doeta(body, ..args) = text(fill: orange, ..args, math.underline(body))
 #let desugar(body, ..args) = text(fill: purple, ..args, math.underline(body))
 #let code(body, ..args) = math.overline(body, ..args)
 #let letin(x, item) = $"let" x = item "in"$
-#let rule(name, body) = align(center)[
+#let ruleitem(name, body) = align(center)[
   *规则#name*:
   #body
 ]
+#let FV = $"FV"$
+#let substto = math.arrow.bar
 #let item-box(body, caption: none, ..args) = block(
   inset: 0.5em,
   stroke: 0.5pt + gray,
@@ -213,7 +217,7 @@
         $M, N$,
         {
           Or[$x$][_variable_]
-          Or[$lambda x. M$][_abstraction_#pin("abstraction")]
+          Or[$lambda x. M$][_abstraction_]
           Or[$M N$][_application_]
         },
       ),
@@ -229,12 +233,7 @@
   ]
 
   #later[
-    #point-explain(
-      "abstraction",
-      offset-dx: 20pt,
-      offset-dy: 38pt,
-      body-dx: -270pt,
-    )[在这里就是函数的另一种说法]
+    Abstraction 在这里就是函数的另一种说法。
   ]
 
   #later[
@@ -260,7 +259,7 @@
   ]
 
   #only(2)[
-    #rule(1)[函数应用（applications）是左结合的]
+    #ruleitem(1)[函数应用（applications）是左结合的]
 
     #grid(columns: 2, gutter: 1em)[
       #item-box(caption: [$x y z = (x y) z$])[
@@ -286,7 +285,7 @@
   ]
 
   #only(3)[
-    #rule(
+    #ruleitem(
       2,
     )[抽象（abstractions）的优先级比应用低（$lambda x.$ 作用到最远的位置）]
 
@@ -419,14 +418,14 @@
   == 用 #lc;编程 -- 邱奇编码 -- 布尔值
 
   $
-            "true" & = lambda x. lambda y. x \
-           "false" & = lambda x. lambda y. y \
+            T & = lambda x. lambda y. x \
+           F & = lambda x. lambda y. y \
     "if_then_else" & = lambda b. lambda t. lambda f. b t f
   $
 
   第一次见可能难以理解，让我们看看以下这两个 $lambda$-项等于什么。
-  - $"if_then_else" "true" M N$
-  - $"if_then_else" "false" M N$
+  - $"if_then_else" T M N$
+  - $"if_then_else" F M N$
 ]
 
 #slide[
@@ -435,28 +434,28 @@
   #set text(size: 0.9em)
 
   $
-    desugar("if_then_else" "true") space M N=& dobeta((lambda b. lambda t. lambda f. b t f) (lambda x. lambda y. x)) M N \
+    desugar("if_then_else" T) space M N=& dobeta((lambda b. lambda t. lambda f. b t f) (lambda x. lambda y. x)) M N \
     step(beta)& dobeta((lambda t. lambda f. (lambda x. lambda y. x) t f) M) N \
     step(beta)& dobeta((lambda f. (lambda x. lambda y. x) M f)) N \
     step(beta)& dobeta((lambda x. lambda y. x) M) N \
     step(beta)& dobeta((lambda y. M) N) \
     step(beta)& M \
 
-    "if_then_else" "false" M N steps(beta)& N
+    "if_then_else" F M N steps(beta)& N
   $
 ]
 
 #slide[
   == 用 #lc;编程 -- 邱奇编码 -- 布尔值
 
-  很自然的，我们可以定义 $"not" eq.def lambda b. "if_then_else" b "false" "true"$.
+  很自然的，我们可以定义 $"not" eq.def lambda b. "if_then_else" b F T$.
 
   $
-    desugar("not") =&lambda b. desugar("if_then_else") space b "false" "true" \
-    =& lambda b. dobeta((lambda b. lambda t. lambda f. b t f) b) "false" "true" \
-    step(beta)& lambda b. dobeta((lambda t. lambda f. b t f) "false") "true" \
-    step(beta)& lambda b. dobeta((lambda f. b "false" f) "true") \
-    step(beta)& lambda b. b "false" "true"
+    desugar("not") =&lambda b. desugar("if_then_else") space b F T \
+    =& lambda b. dobeta((lambda b. lambda t. lambda f. b t f) b) F T \
+    step(beta)& lambda b. dobeta((lambda t. lambda f. b t f) F) T \
+    step(beta)& lambda b. dobeta((lambda f. b F f) T) \
+    step(beta)& lambda b. b F T
   $
 
   #note[可以注意到，不同于上一页，我们在函数未被应用前就进行了“求值”。我们将在讲到求值顺序的时候讨论这件事情。]
@@ -470,13 +469,13 @@
   #columns(2)[
     一个数据结构有哪些要素？
     #later[
-      - 如何构造 -- $"true"$ 和 $"false"$
+      - 如何构造 -- $T$ 和 $F$
       - 如何使用 -- $"if_then_else"$
     ]
     #colbreak()
     $
-              "true" & = lambda x. lambda y. x \
-             "false" & = lambda x. lambda y. y \
+              T & = lambda x. lambda y. x \
+             F & = lambda x. lambda y. y \
       "if_then_else" & = lambda b. lambda t. lambda f. b t f
     $
   ]
@@ -486,7 +485,7 @@
   ]
   #uncover("3-")[
 
-    - $"true"$ 接受两个参数，返回第一个；$"false"$ 也接受两个参数，返回第二个。
+    - $T$ 接受两个参数，返回第一个；$F$ 也接受两个参数，返回第二个。
     - $"if_then_else"$ 实际上 $"if_then_else"$ 和恒等函数 $I$ 等价。
 
       #columns(2)[
@@ -510,25 +509,25 @@
   邱奇编码的独特之处在于，构造出的数据结构用函数直接编码了“使用”。
 
   $
-    "and" eq.def & lambda a. lambda b. a b "false" \
-    "or" eq.def & lambda a. lambda b. a "true" b
+    "and" eq.def & lambda a. lambda b. a b F \
+    "or" eq.def & lambda a. lambda b. a T b
   $
 
   因为 $a$ 本身就等价于 $I a$ 等价于 $"if_then_else" a$ 。不难验证：
 
   #columns(2)[
     $
-      & "and" "true" "true" &steps(beta)& "ture" \
-      & "and" "true" "false" &steps(beta)& "false" \
-      & "and" "false" "true" &steps(beta)& "false" \
-      & "and" "false" "false" &steps(beta)& "false"
+      & "and" T T &steps(beta)& T \
+      & "and" T F &steps(beta)& F \
+      & "and" F T &steps(beta)& F \
+      & "and" F F &steps(beta)& F
     $
     #colbreak()
     $
-      & "or" "true" "true" &steps(beta)& "ture" \
-      & "or" "true" "false" &steps(beta)& "ture" \
-      & "or" "false" "true" &steps(beta)& "ture" \
-      & "or" "false" "false" &steps(beta)& "false"
+      & "or" T T &steps(beta)& T \
+      & "or" T F &steps(beta)& T \
+      & "or" F T &steps(beta)& T \
+      & "or" F F &steps(beta)& F
     $
   ]
 ]
@@ -598,7 +597,7 @@
   $
     "add" eq.def & lambda n. lambda m. underline(lambda f. lambda x. n f (m f x)) \
     "mult" eq.def & lambda n. lambda m. underline(lambda f. n (m f)) \
-    "iszero" eq.def & lambda n. underline(n (K "false") "true") \
+    "iszero" eq.def & lambda n. underline(n (K F) T) \
   $
 
   经典习题：定义 $"pred"$ 函数，使得 $"pred" code(n) = code(n minus.dot 1)$，其中 $minus.dot$ 运算符定义如下：
@@ -640,7 +639,7 @@
 #slide[
   == #lc;的扩展
 
-  #set text(size: 0.9em)
+  #set text(size: 0.85em)
 
   我们不会想要用 #lc;编码所有数据类型，这在真实的硬件上非常低效。
   我们可以在内存中直接存储整数和布尔值，也可以用指针或者成块的内存表示对和列表。
@@ -653,7 +652,8 @@
         $M, N$,
         {
           Or[$...$][]
-          Or[$T | F$][]
+          Or[$"true" | "false"$][_boolean_]
+          Or[$"if" M "then" N_1 "else" N_2$][]
           Or[$n$][_natural number_]
           Or[$M "op" N$][_natural number operation_]
         },
@@ -669,841 +669,361 @@
   新增语法可以和 #lc;和谐共存。
 
   $
+    "church_to_boolean" eq.def & lambda b. b "true" "false" \
+    "boolean_to_church" eq.def & lambda b. "if" b "then" T "else" F \
     "church_to_nat" eq.def & lambda n. n (lambda m. m + 1) 0 \
     "square_nat" eq.def & lambda n. n * n \
   $
+
+  经典练习：在整个分享结束后，编写一个 $"nat_to_church"$#footnote[现在你可能还没有完成这个练习的知识。]。
 ]
-
-#slide[
-  == Church 编码 —— 自然数
-
-
-  #set text(size: 0.92em)
-  $n$ 编码为：对 $f$ 应用 $n$ 次。
-
-  #v(0.4em)
-  #grid(columns: 2, gutter: 2em)[
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      $accent(0, -) = lambda f . lambda x . x$ \
-      $accent(1, -) = lambda f . lambda x . f space x$ \
-      $accent(2, -) = lambda f . lambda x . f space (f space x)$ \
-      $accent(3, -) = lambda f . lambda x . f space (f space (f space x))$ \
-      $dots$
-    ]
-  ][
-    #block(inset: 8pt, stroke: 0.5pt + blue, radius: 4pt, width: 100%)[
-      ```nix
-      0 = f: x: x;
-      1 = f: x: f x;
-      2 = f: x: f (f x);
-      3 = f: x: f (f (f x));
-      ```
-    ]
-  ]
-
-  #v(0.5em)
-  #align(center)[
-    $accent(n, -) space f space x = f space (f space dots.h.c (f space x) dots.h.c)$
-    #h(1em) ($f$ 出现 $n$ 次)
-  ]
-]
-
-#slide[
-  == Church 编码 —— 算术
-
-
-  #set text(size: 0.88em)
-  #grid(columns: 2, gutter: 2em)[
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      后继： \
-      $upright("succ") = lambda n . lambda f . lambda x . f space (n space f space x)$ \
-      #v(0.3em)
-      加法： \
-      $upright("add") = lambda m . lambda n . lambda f . lambda x . m space f space (n space f space x)$ \
-      #v(0.3em)
-      乘法： \
-      $upright("mul") = lambda m . lambda n . lambda f . m space (n space f)$
-    ]
-  ][
-    #block(inset: 8pt, stroke: 0.5pt + blue, radius: 4pt, width: 100%)[
-      ```nix
-      succ = n: f: x: f (n f x);
-      add  = m: n: f: x: m f (n f x);
-      mul  = m: n: f: m (n f);
-      ```
-    ]
-  ]
-
-  #v(0.5em)
-  $upright("add") space accent(2, -) space accent(3, -) space f space x
-  = f space (f space (f space (f space (f space x)))) = accent(5, -) space f space x$。
-  #note[✓]
-]
-
-// ---------- 对 ----------
-
-#slide[
-  == Church 编码 —— 对 & 列表
-
-
-  #set text(size: 0.88em)
-  #grid(columns: 2, gutter: 2em)[
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      *对 (Pair)* \
-      $upright("pair") = lambda a . lambda b . lambda f . f space a space b$ \
-      $upright("fst") = lambda p . p space (lambda a . lambda b . a)$ \
-      $upright("snd") = lambda p . p space (lambda a . lambda b . b)$ \
-      #v(0.5em)
-      *列表* \
-      $upright("nil") = lambda f . lambda x . x$ \
-      $upright("cons") = lambda h . lambda t . lambda f . lambda x . f space h space (t space f space x)$ \
-      $upright("null") = lambda l . l space (lambda h . lambda t . upright("false")) space upright("true")$
-    ]
-  ][
-    #block(inset: 8pt, stroke: 0.5pt + blue, radius: 4pt, width: 100%)[
-      ```nix
-      pair = a: b: f: f a b;
-      fst  = p: p (a: b: a);
-      snd  = p: p (a: b: b);
-
-      nil  = f: x: x;
-      cons = h: t: f: x: f h (t f x);
-      null = l: l (h: t: false) true;
-      ```
-    ]
-  ]
-]
-
-#slide[
-  == Church 编码 —— 列表操作
-
-
-  #set text(size: 0.88em)
-  #grid(columns: 2, gutter: 2em)[
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      $upright("head") = lambda l . l space (lambda h . lambda t . h) space upright("nil")$ \
-      $upright("tail") = lambda l . upright("fst") space (l space (lambda h . lambda t . upright("pair") space t space (upright("cons") space h space t)) space (upright("pair") space upright("nil") space upright("nil")))$ \
-      #v(0.4em)
-      $upright("fold") = lambda f . lambda z . lambda l . l space f space z$ \
-      #v(0.4em)
-      $upright("sum") = upright("fold") space upright("add") space accent(0, -)$
-    ]
-  ][
-    #block(inset: 8pt, stroke: 0.5pt + blue, radius: 4pt, width: 100%)[
-      ```nix
-      head = l: l (h: t: h) nil;
-      tail = l: fst
-        (l (h: t: pair t (cons h t))
-           (pair nil nil));
-
-      fold = f: z: l: l f z;
-      sum  = fold add 0;
-      ```
-    ]
-  ]
-]
-
-// ==================== 3. 语法糖 ====================
-
-#slide[
-  == 语法糖
-
-
-  标准 #lc;的写法很冗长，引入 *语法糖* 来简化。
-
-  #v(0.6em)
-  #set text(size: 0.92em)
-  #grid(columns: 2, gutter: 2em)[
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      #align(center)[*#lc;语法糖*]
-      #v(0.3em)
-      $lambda x y . M$ 是 $lambda x . lambda y . M$ \
-      $M space N space P$ 是 $(M space N) space P$ \
-      $upright("let") space x = N space upright("in") space M$ \
-      #h(1.5em) 是 $(lambda x . M) space N$
-    ]
-  ][
-    #block(inset: 8pt, stroke: 0.5pt + blue, radius: 4pt, width: 100%)[
-      #align(center)[*Nix 语法糖*]
-      #v(0.3em)
-      `x: y: body` 是 `x: (y: body)` \
-      `f x y` 是 `(f x) y` \
-      ```nix
-      let x = n; in body
-      ```
-      是 `(x: body) n`
-    ]
-  ]
-]
-
-#slide[
-  == let 也是语法糖
-
-
-  `let` 绑定可以嵌套展开：
-
-  #v(0.4em)
-  #set text(size: 0.92em)
-  #grid(columns: 2, gutter: 2em)[
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      $upright("let") space x = N space upright("in") space M$ \
-      #h(1.5em) $arrow.r$ $(lambda x . M) space N$ \
-      #v(0.3em)
-      $upright("let") space x = N; space y = P space upright("in") space M$ \
-      #h(1.5em) $arrow.r$ $(lambda x y . M) space N space P$
-    ]
-  ][
-    #block(inset: 8pt, stroke: 0.5pt + blue, radius: 4pt, width: 100%)[
-      ```nix
-      let x = n; in body
-      # => (x: body) n
-
-      let x = n; y = m; in body
-      # => (x: y: body) n m
-      ```
-    ]
-  ]
-
-  #v(0.8em)
-  #align(center)[
-    $upright("let")$ 就是 $lambda$-抽象 + 应用。
-  ]
-]
-
-#slide[
-  == Church 编码汇总
-
-
-  #set text(size: 0.88em)
-  #align(center)[
-    #table(
-      columns: 4,
-      align: (center, center, center, left),
-      stroke: 0.5pt + gray,
-      table.header[*概念*][*#lc*][*Nix*][*直觉*],
-      [true], [$lambda t lambda f . t$], [`t: f: t`], [选第一个],
-      [false], [$lambda t lambda f . f$], [`t: f: f`], [选第二个],
-      [$accent(0, -)$],
-      [$lambda f lambda x . x$],
-      [`f: x: x`],
-      [对 $f$ 应用 0 次],
-
-      [$accent(n, -)$],
-      [$lambda f lambda x . f^n x$],
-      [`f: x: f^n x`],
-      [对 $f$ 应用 $n$ 次],
-
-      [pair],
-      [$lambda a lambda b lambda f . f space a space b$],
-      [`a: b: f: f a b`],
-      [二元组],
-
-      [nil], [$lambda f lambda x . x$], [`f: x: x`], [空列表],
-      [cons],
-      [$lambda h lambda t lambda f lambda x . f space h space (t space f space x)$],
-      [`h: t: f: x: f h (t f x)`],
-      [非空列表],
-    )
-  ]
-
-  #v(0.6em)
-  #note[全部都是 lambda。没有原始类型，没有特殊形式。]
-]
-
-#slide[
-  == 用 Church 编码写程序
-
-
-  #set text(size: 0.88em)
-  例如，用纯 #lc;写 `sum (cons 3 (cons 5 nil))`：
-
-  #v(0.3em)
-  #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-    $(lambda f . lambda x . f space (f space (f space x)))$ \
-    $space space ((lambda f . lambda x . f space (f space (f space (f space (f space x)))))$ \
-    $space space space space (lambda f . lambda x . x))$
-  ]
-
-  #v(0.3em)
-  上面这个纯 $lambda$-项的值是 $accent(8, -)$（$3 + 5 = 8$）。
-
-  #v(0.5em)
-  #note[
-    但写起来非常痛苦。这就是为什么 Nix 加了 bool、int、string 和 attrset。
-  ]
-]
-
-// ==================== 5. 形式语义 ====================
 
 #slide[
   == #lc;的形式语义
 
+  我们说 #lc;不仅是一个理想化的程序设计语言，还是一个“形式系统”。
 
-  到目前为止，我们只是"感觉" #lc;能算。\
-  现在来精确地定义什么是"算"。
-
-  #v(0.6em)
-
-  $lambda$-项的语法：
-  #align(center)[
-    $M, N ::=
-    x
-    space | space
-    lambda x . M
-    space | space
-    M space N$
-  ]
-
-  其中变量 $x$ 可以是 *自由的* 或 *绑定的*。 \
-  $lambda x$ 把 $M$ 中所有自由出现的 $x$ 绑定起来。
+  我将非常简单（但会保证精确）地过一遍 #lc;的形式语义。
 ]
 
 #slide[
-  == $beta$-归约
+  == #lc;的形式语义 -- $alpha$-等价
 
-
-  #def("定义：β-归约")[
-    $(lambda x . M) space N arrow.r.long_beta M[x := N]$
+  我们先从所谓的 $alpha$-等价开始，之前我们提到过：
+  $ lambda x. x x = lambda y. y y $
+  #later[
+    这很显然，但考虑更加复杂一些的情形呢？
+    $ lambda x. lambda x. x != & lambda y. lambda x. y \
+      lambda x. lambda x. x = & lambda x. lambda y. y $
   ]
+]
 
-  #v(0.4em)
+#slide[
+  == #lc;的形式语义 -- $alpha$-等价
 
-  把函数体 $M$ 中所有自由出现的 $x$ 替换为 $N$。
-
-  #v(0.4em)
-
-  #set text(size: 0.88em)
-  例如：
-  #align(center)[
-    $(lambda x . x space y) space z arrow.r.long_beta z space y$
+  #columns(2)[
+    #set align(center)
+    #prooftree(rule(
+      name: text(fill: purple)[$(alpha)$],
+      $lambda x. M = lambda y. M[y slash x]$
+    ))
+    #prooftree(rule(
+      name: $(xi)$,
+      $M = M'$,
+      $lambda x. M = lambda x. M'$
+    ))
+    #prooftree(rule(
+      name: $("cong")$,
+      $M = M'$, $N = N'$,
+      $M N = M' N'$
+    ))
+    #colbreak()
+    #prooftree(rule(
+      name: $("refl")$,
+      $M = M$
+    ))
+    #prooftree(rule(
+      name: $("sym")$,
+      $N = M$,
+      $M = N$
+    ))
+    #prooftree(rule(
+      name: $("trans")$,
+      $M_1 = M_2$,
+      $M_2 = M_3$,
+      $M_1 = M_3$
+    ))
   ]
-
-  #v(0.6em)
-
-  #def("定义：范式 (Normal Form)")[
-    一个项如果不存在任何 β-归约，则处于 *范式*（NF）。
-  ]
-
-  #v(0.4em)
 
   #note[
-    替换时要避免"变量捕获"——$N$ 中的自由变量不能被 $M$ 中的绑定变量意外捕获。
-    需要先做 α-转换（重命名绑定变量）。
+    最核心的规则就是 $(alpha)$，它表示将 $lambda x. M$ 中的 $x$ 替换为 $y$ 之后获得的 $lambda$-项和原来的项等价。但是替换如何定义很重要，我们会在后面简单讨论替换的精确定义。
   ]
 ]
 
 #slide[
-  == $alpha$-转换
+  == #lc;的形式语义 -- 操作语义
 
+  #set text(size: 0.9em)
 
-  #def("定义：α-等价")[
-    绑定变量的名字不影响含义：
-    $lambda x . M equiv_lambda lambda y . M[x := y]$
+  #lc;的形式语义有很多种，但通常我们会定义小步操作语义（small-step operational semantics），因为它展现了 #lc;的计算过程。
+
+  #columns(2)[
+    #set align(center)
+    #prooftree(rule(
+      name: text(fill: purple)[$(beta)$],
+      $(lambda x. M) N step(beta) M[N slash x]$
+    ))
+    #prooftree(rule(
+      name: $(xi)$,
+      $M step(beta) M'$,
+      $lambda x. M step(beta) lambda x. M'$
+    ))
+    #colbreak()
+    #prooftree(rule(
+      name: $("cong1")$,
+      $M step(beta) M'$,
+      $M N step(beta) M' N$
+    ))
+    #prooftree(rule(
+      name: $("cong2")$,
+      $N step(beta) N'$,
+      $M N step(beta) M N'$
+    ))
   ]
 
-  #v(0.4em)
-
-  $lambda x . x equiv_lambda lambda y . y$，都是恒等函数。
-
-  #v(0.4em)
-
-  但要注意捕获问题：
-  #align(center)[
-    $(lambda y . lambda x . y) space x$
-    $arrow.r.long_beta lambda x . y[y := x] = lambda x . x$ #text(
-      fill: red,
-    )[← 错！]
-  ]
-
-  应该先 $alpha$-转换：$lambda y . lambda x . y arrow.r.long_alpha lambda z . lambda x . z$
-
-  #v(0.3em)
-  #note[Nix 的求值器内部也会做类似的处理。]
+  - 应用 $(beta)$ 规则又被称为做 $beta$-规约（reduction），$(lambda x. M) N step(beta)$ 又被称为 $beta$-redex。
+  - （Church-Rosser 定理）如果 $M steps(beta) M_1$ 和 $M steps(beta) M_2$，那么存在项 $N$，有 $M_1 steps(beta) N$ 和 $M_2 steps(beta) N$。
 ]
 
-// ==================== 6. 求值顺序 ====================
+#slide[
+  == #lc;的形式语义 -- 替换
+
+  简单看一下如何定义 $M[N slash x]$。
+
+  $
+    x[N slash x] &eq.def N \
+    y[N slash x] &eq.def y quad "if" x != y \
+    (M_1 M_2)[N slash x] &eq.def (M_1[N slash x]) (M_2[N slash x]) \
+    (lambda x. M')[N slash x] &eq.def mathimportant(lambda x. M') \
+    (lambda y. M')[N slash x] &eq.def lambda y. M'[N slash x] quad "if" x != y, mathimportant(y in.not FV(N)) \
+    (lambda y. M')[N slash x] &eq.def mathimportant(lambda y'. M'[y'slash y])[N slash x] quad "if" x != y\, mathimportant(y in FV(N))\, mathimportant(y' "fresh")
+  $
+]
+
 
 #slide[
-  == 求值顺序
+  == #lc;的形式语义 -- 替换
 
+  最后一条规则
+  $ (lambda y. M')[N slash x] &eq.def mathimportant(lambda y'. M'[y'slash y])[N slash x] quad "if" x != y\, mathimportant(y in FV(N))\, mathimportant(y' "fresh") $
+  可以处理以下情形。
+  $ dobeta((lambda y. x) y) step(beta) (lambda y. x)[y slash x] =& lambda y'. y \
+    !=& lambda y.y $
+]
 
-  β-归约允许我们"选择先算哪里"。选择会影响计算过程，甚至影响结果。
+#slide[
+  == #lc;的形式语义 -- 自由变量
 
-  #v(0.4em)
+  最后，自由变量的定义比较简单。
 
-  #grid(columns: 2, gutter: 2em)[
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      #align(center)[*正则序* (Normal Order)]
-      最外层、最左边优先
-      #v(0.3em)
-      $(lambda x . y) space ((lambda x . x x) space (lambda x . x x))$
-      $arrow.r.long y$
+  $
+    FV(x) = {x} \
+    FV(lambda x. M) = FV(M) without { x } \
+    FV(M N) = FV(M) union FV(N)
+  $
+]
+
+#slide[
+  == #lc;的求值策略
+
+  你可能经常会听到以下词汇：
+  - 某个语言的求值是#important[“eager”]或#important[“lazy”]的
+  - 某个语言是#important[“strict”]/#important[“non-strict”]的
+  这些词都跟求值策略有关。
+]
+
+#slide[
+  == #lc;的求值策略 -- Call-by-Value
+
+  Call-by-value（eager 求值），函数调用必须传入一个“值”。
+
+  - 我们首先定义什么叫“值”，在 #lc;中，值就是函数。
+    #align(center, bnf(
+      Prod(
+        $v$,
+        {
+          Or[$lambda x. M$][]
+        },
+      ),
+    ))
+  - 然后限定求值顺序。
+    #columns(2)[
+      #set align(center)
+      #prooftree(rule(
+        name: $("cong1")$,
+        $M step(beta) M'$,
+        $M N step(beta) M' N$
+      ))
+      #prooftree(rule(
+        name: text(fill: purple)[$(beta)$],
+        $(lambda x. M) mathimportant(v) step(beta) M[mathimportant(v) slash x]$
+      ))
+      #colbreak()
+      #prooftree(rule(
+        name: $("cong2")$,
+        $N step(beta) N'$,
+        $mathimportant(v) N step(beta) mathimportant(v) N'$
+      ))
     ]
-  ][
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      #align(center)[*应用序* (Applicative Order)]
-      最内层、最左边优先
-      #v(0.3em)
-      同一个项：
-      #v(0.3em)
-      无限循环！
-    ]
-  ]
-
-  #v(0.6em)
-  #note[正则序保证：如果有范式，一定能找到；应用序不一定。]
 ]
 
 #slide[
-  == 惰性求值（Call-by-Need）
-  #v(0.5em)
+  == #lc;的求值策略 -- Call-by-Name
 
-  Nix 既不是正则序，也不是应用序，而是 *惰性求值*。
+  Call-by-name，函数参数总是原样传入函数，直到真正被用到时才求值。
 
-  #v(0.15em)
+  #columns(2)[
+    #set align(center)
+    #prooftree(rule(
+      name: $("cong1")$,
+      $M step(beta) M'$,
+      $M N step(beta) M' N$
+    ))
+    #colbreak()
+    #prooftree(rule(
+      name: text(fill: purple)[$(beta)$],
+      $(lambda x. M) N step(beta) M[N slash x]$
+    ))
+  ]
 
-  #set text(size: 0.85em)
-  #align(center)[
+  #note[没有 $("cong2")$ 和 $(xi)$ 规则。]
+
+  在这种求值顺序下，函数的参数只有真正被使用的时候才会被求值。
+]
+
+#slide[
+  == #lc;的求值策略 -- Call-by-Name
+
+  实际上，没有什么现代语言在使用 Call-by-name，因为如果我们多次使用同一个函数参数，那么这个参数会被求值多次。
+
+  #columns(2)[
+    - Call-by-name 下，以下 $lambda$-项需要四步求值。
+        $
+          dobeta((lambda x. x x) (I I)) step(beta)& dobeta((I I)) (I I) \
+                                step(beta)& dobeta(I (I I)) \
+                                step(beta)& dobeta((I I)) \
+                                =& I \
+        $
+
+    - 而在 Call-by-value 下，同样的项只需三步求值。
+      $
+        (lambda x. x x) dobeta((I I)) step(beta)& dobeta((lambda x. x x) I) \
+                              step(beta)& dobeta(I I) \
+                              =& I \
+      $
+  ]
+]
+
+#slide[
+  == #lc;的求值策略 - Call-by-Need
+
+  如果我们对 Call-by-name 做一个优化，让同一个参数的多次使用的求值可以共享，就变成了 Call-by-need。
+
+  可以用“图规约”来理解 call-by-need，还是以 $(lambda x. x x) (I I)$ 为例子。
+  #columns(4)[
+    #set align(center)
+    #diagram(cell-size: 10mm,
+    spacing: 1.5em,
+      {
+      let (app1, omega, app2, i1, i2) = ((0, 0), (-0.5, 1), (0.5, 1), (0, 2), (1, 2))
+      node(app1, $@$)
+      node(omega, $lambda x. x x$)
+      node(app2, $@$)
+      node(i1, $I$)
+      node(i2, $I$)
+      edge(app1, omega, "->")
+      edge(app1, app2, "->")
+      edge(app2, i1, "->")
+      edge(app2, i2, "->")
+    })
+    #colbreak()
+    #diagram(cell-size: 10mm,
+    spacing: 1.5em,
+     {
+      let (app1, app2, i1, i2) = ((0, 0), (0, 1), (-0.5, 2), (0.5, 2))
+      node(app1, $@$)
+      node(app2, $@$)
+      node(i1, $I$)
+      node(i2, $I$)
+      edge(app1, app2, "->", bend: 20deg)
+      edge(app1, app2, "->", bend: -20deg)
+      edge(app2, i1, "->")
+      edge(app2, i2, "->")
+    })
+    #colbreak()
+    #diagram(cell-size: 10mm,
+    spacing: 1.5em,
+     {
+      let (app1, i) = ((0, 0), (0, 1))
+      node(app1, $@$)
+      node(i, $I$)
+      edge(app1, i, "->", bend: 20deg)
+      edge(app1, i, "->", bend: -20deg)
+    })
+    #colbreak()
+    #diagram(cell-size: 10mm,
+    spacing: 1.5em,
+     {
+      let (i) = ((0, 0))
+      node(i, $I$)
+    })
+  ]
+]
+
+#slide[
+  == #lc;的求值策略
+
+  我们介绍了常见的三种求值策略：
+  - Call-by-value
+  - Call-by-name
+  - Call-by-need
+
+  那么一些常见程序设计语言中的说法对应这里的哪种求值策略呢？
+
+  #columns(2)[
+    #set align(center)
     #table(
-      columns: 3,
-      align: center,
-      stroke: 0.5pt + gray,
-      inset: (x: 5pt, y: 3pt),
-      table.header[*策略*][*何时算参数*][*特点*],
-      [正则序], [用到时才算，每次用都重算], [最慢，但能找到范式],
-      [应用序], [调用前就算], [可能在不需要的参数上发散],
-      [惰性求值], [用到时才算，算过一次就缓存], [兼顾效率和正确性],
+      columns: 2,
+      inset: 0.5em,
+      [Eager], [Call-by-value],
+      [Lazy], [Call-by-name/need],
+    )
+    #table(
+      columns: 2,
+      inset: 0.5em,
+      [Strict], [Call-by-value],
+      [Non-strict], [Call-by-name/need]
     )
   ]
-
-  #v(0.2em)
-  Nix 的惰性求值意味着：
-  - `if cond then a else b` 只算 `a` 或 `b` 其中一个
-  - `let x = expensive; in ...` 只有用到 `x` 时才计算
-  - 如果同一个 `x` 被用了多次，只算一次
-
-  #v(0.15em)
-  #note[惰性求值 = 正则序的正确性 + 应用序的效率（缓存）。]
 ]
 
-// ==================== 7. 不动点 ====================
+#slide[
+  == #lc;的求值策略 -- Strict vs. Non-strict
+
+  Lazy 和 eager 比较好理解：
+  - Lazy 的求值策略，项只有在真正被用到的时候才被求值；
+  - Eager 的求值策略，总是先将参数求值完毕再传入。
+
+  可什么是 strict 和 non-strict 呢？
+  - 在 strict 的语言中，一定有 $f bot = bot$；
+  - 在 non-strict 的语言中，可以存在函数 $f$，使得 $f bot != bot$，比如 $f = K I$。
+
+  这里的 $bot$ 就是出错的意思。
+]
+
+#slide[
+  == #lc;的求值策略 -- 在 Nix 里试试
+
+  Nix 是 call-by-need，lazy，和 non-strict 的语言。
+
+  - Call-by-need
+    ```nix
+    (x: x x) (builtins.trace "once" (x: x))
+    ```
+  - Lazy
+    ```nix
+    (x: "value1") (builtins.trace "not evaluated" "value2")
+    ```
+  - Non-strict：
+    ```nix
+    (x: "ok") (throw "error")
+    ```
+]
 
 #slide[
   == 不动点
-  #v(0.8em)
 
-  问题：#lc;里没有 `let rec`，函数不能直接调用自己。
+  数学上，函数 $f : A -> B$ 的不动点指的是某个 $c in A inter B$，满足：$ f(c) = c $
 
-  #v(0.4em)
-  $lambda f . f space f$？可以把 $f$ 传给自己，但无法递归调用任意函数。
 
-  #v(0.5em)
-
-  #def("定义：不动点 (Fixed Point)")[
-    如果 $f space p = p$，则 $p$ 是 $f$ 的不动点。
-  ]
-
-  #v(0.4em)
-  例：$g space x = x^2$ 的不动点是 $0$ 和 $1$。
-
-  #v(0.5em)
-  #align(center)[
-    *关键洞察：如果我们能为任意 $f$ 找到不动点，就能实现递归。*
-  ]
-]
-
-#slide[
-  == Y 组合子
-
-
-  Haskell Curry 发现了 $Y$ 组合子，它是计算不动点的"函数"：
-
-  #v(0.5em)
-  #align(center)[
-    $Y = lambda f . (lambda x . f space (x space x)) space (lambda x . f space (x space x))$
-  ]
-
-  #v(0.6em)
-
-  验证：
-  $Y space f$
-  $= (lambda x . f space (x space x)) space (lambda x . f space (x space x))$
-  $= f space ((lambda x . f space (x space x)) space (lambda x . f space (x space x)))$
-  $= f space (Y space f)$ #note[✓]
-
-  #v(0.5em)
-  #align(center)[
-    $Y space f = f space (Y space f)$，即 $Y space f$ 是 $f$ 的不动点。
-  ]
-]
-
-#slide[
-  == 用 Y 组合子写递归
-
-
-  #set text(size: 0.88em)
-  #grid(columns: 2, gutter: 2em)[
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      *阶乘* \
-      $upright("fact") = Y space (lambda f . lambda n . upright("if") space (upright("iszero") space n)$
-      #h(
-        3em,
-      ) $accent(1, -) space (upright("mul") space n space (f space (upright("pred") space n))))$
-      #v(0.4em)
-      $upright("fact") space accent(3, -) arrow.r.long^* accent(6, -)$
-    ]
-  ][
-    #block(inset: 8pt, stroke: 0.5pt + blue, radius: 4pt, width: 100%)[
-      ```nix
-      fact = Y (f: n:
-        if isZero n
-          1
-          (mul n (f (pred n))));
-
-      fact 3
-      # => 6
-      ```
-    ]
-  ]
-
-  #v(0.6em)
-  注意 $f$ 并没有引用自己——是 $Y$ 帮它"自己调自己"的。
-]
-
-#slide[
-  == 不动点的威力
-
-
-  $Y$ 组合子可以为 *任何* 函数找到不动点，不只是数值函数。
-
-  #v(0.5em)
-  例如，用 $Y$ 定义斐波那契：
-  #v(0.3em)
-  #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-    $upright("fib") = Y space (lambda f . lambda n . upright("if") space (upright("leq") space n space accent(1, -))$
-    #h(
-      3em,
-    ) $n space (upright("add") space (f space (upright("pred") space n)) space (f space (upright("pred") space (upright("pred") space n)))))$
-  ]
-
-  #v(0.5em)
-  #note[
-    $Y$ 组合子是惰性语言用的版本（Haskell Curry 的版本）。
-    严格语言（eager language）需要 $Z$ 组合子，延迟参数的求值：
-    $Z = lambda f . (lambda x . f space (lambda y . x space x space y)) space (lambda x . f space (lambda y . x space x space y))$
-  ]
-]
-
-// ==================== 8. 理解 Nix 库 ====================
-
-#slide[
-  == 理解 Nix 库
-
-
-  现在我们知道不动点了。看看它在 Nix 中无处不在的应用：
-
-  #v(0.5em)
-  #columns(2)[
-    + `let` & `rec` & `lib.fix`
-    + Overlay
-    + NixOS modules
-    #colbreak()
-    #note[
-      它们全都是同一个数学概念：\
-      不动点。
-    ]
-  ]
-]
-
-#slide[
-  == `lib.fix`
-  #v(0.8em)
-
-  #set text(size: 0.85em)
-  #grid(columns: 2, gutter: 2em)[
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      *Y 组合子：* \
-      $Y space f = f space (Y space f)$
-    ]
-  ][
-    #block(inset: 8pt, stroke: 0.5pt + blue, radius: 4pt, width: 100%)[
-      ```nix
-      # lib.nix 中的 fix
-      fix = f: let x = f x; in x;
-      ```
-    ]
-  ]
-
-  #v(0.4em)
-
-  `fix` 是 $Y$ 的 Nix 版本。它接受一个函数 $f$，返回 $f$ 的不动点。
-
-  #v(0.3em)
-  ```nix
-  fix (self: {
-    a = 1;
-    b = self.a + 2;
-  })
-  # => { a = 1; b = 3; }
-  ```
-  #note[`self` 引用的就是最终的结果——一个不动点。]
-]
-
-#slide[
-  == `let` vs `rec` vs `fix`
-  #v(0.5em)
-
-  #set text(size: 0.75em)
-  *普通 `let`*：没有递归。
-  ```nix
-  let x = 1; y = x + 1; in y   # => 2，但 x 不能引用 y
-  ```
-
-  #v(0.15em)
-  *`rec`*：递归 attrset。
-  ```nix
-  rec { a = 1; b = a + 1; }    # => { a = 1; b = 2; }
-  ```
-  内部的 `a` 能引用同一 attrset 里的其他字段。
-
-  #v(0.15em)
-  `rec` 本质上是 `fix` 的语法糖：
-  ```nix
-  # rec { a = 1; b = a + 1; }
-  # 等价于
-  fix (self: { a = 1; b = self.a + 1; })
-  ```
-]
-
-#slide[
-  == Overlay：高阶函数的不动点
-  #v(0.5em)
-
-  #set text(size: 0.72em)
-  Overlay 是一个函数：`final: prev: { ... }`
-
-  #v(0.1em)
-  - `prev`：上一个版本的包集
-  - `final`：最终的包集（不动点！）
-
-  #v(0.2em)
-  ```nix
-  # Overlay 1：添加一个包
-  (final: prev: { my-pkg = prev.callPackage ./mypkg.nix {}; })
-  # Overlay 2：修改已有包
-  (final: prev: { openssl = prev.openssl.overrideAttrs { ... }; })
-  ```
-
-  #v(0.2em)
-
-  多个 overlay 叠加后，用 `lib.extends` 构造一个函数，然后对它求不动点：
-  ```nix
-  fix (lib.extends overlay2 (lib.extends overlay1 basePkgs))
-  ```
-
-  #v(0.1em)
-  #note[overlay 的 `final` 参数就是最终的不动点——整个包集。]
-]
-
-#slide[
-  == NixOS Module System：更大的不动点
-
-
-  #set text(size: 0.88em)
-  NixOS 模块系统是不动点思想的极致应用：
-
-  #v(0.4em)
-  ```nix
-  # 每个模块的 config 是最终配置的"局部视图"
-  { config, lib, ... }: {
-    options.services.foo.enable = lib.mkEnableOption "foo";
-    config = lib.mkIf config.services.foo.enable {
-      # config 引用了最终结果的字段
-      networking.firewall.allowedTCPPorts = [ 8080 ];
-    };
-  }
-  ```
-
-  #v(0.4em)
-  所有模块的 `config` 属性合并后，用 `lib.fix` 求不动点。\
-  每个模块看到的 `config` 就是最终的系统配置。
-
-  #v(0.5em)
-  #align(center)[
-    $upright("config") = upright("merge") space (upright("module1") space upright("config")) space (upright("module2") space upright("config")) space dots.h.c$
-  ]
-  #note[这就是一个不动点方程。]
-]
-
-// ==================== 9. 扩展知识 ====================
-
-#slide[
-  == 扩展知识
-
-
-  #columns(2)[
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      不动点组合子 \
-      更多的不动点组合子
-    ]
-    #v(0.5em)
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      #lc;的实现 \
-      变量绑定的表示
-    ]
-    #colbreak()
-    不动点思想贯穿了整个讲义。\
-    这一小节补充更多细节。
-  ]
-]
-
-#slide[
-  == 更多不动点组合子
-
-
-  #set text(size: 0.88em)
-  $Y$ 不是唯一的不动点组合子。还有：
-  #v(0.4em)
-
-  #grid(columns: 2, gutter: 2em)[
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      *Turing 组合子：* \
-      $Theta = (lambda x lambda y . y space (x space x space y)) space (lambda x lambda y . y space (x space x space y))$
-      #v(0.3em)
-      $Theta space f = f space (Theta space f)$
-    ]
-  ][
-    #block(inset: 8pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-      *Z 组合子（严格版 $Y$）：* \
-      $Z = lambda f . (lambda x . f space (lambda y . x space x space y)) space (lambda x . f space (lambda y . x space x space y))$
-      #v(0.3em)
-      $Z space f = f space (Z space f)$
-    ]
-  ]
-
-  #v(0.6em)
-  所有不动点组合子都有 $X space f = f space (X space f)$ 的形式。
-
-  #v(0.3em)
-  #note[Nix 的 `fix = f: let x = f x; in x;` 直接用了惰性求值的特性，比 $Y$ 更简洁。]
-]
-
-#slide[
-  == #lc;的实现
-
-
-  #set text(size: 0.88em)
-  如何在代码里表示 $lambda$-项？一个经典问题：变量名冲突。
-
-  #v(0.4em)
-  解决方案：*de Bruijn 指数*——用数字代替变量名。
-
-  #v(0.4em)
-  #align(center)[
-    #table(
-      columns: 3,
-      align: center,
-      stroke: 0.5pt + gray,
-      table.header[*项*][*带名字*][*de Bruijn*],
-      [恒等函数], [$lambda x . x$], [$lambda . 0$],
-      [常量函数], [$lambda x . lambda y . x$], [$lambda . lambda . 1$],
-      [应用], [$(lambda x . x) space y$], [$(lambda . 0) space y$],
-    )
-  ]
-
-  #v(0.4em)
-  $lambda . 1$ 表示"引用外层第二个 $lambda$ 绑定的变量"。
-
-  #v(0.3em)
-  #note[Nix 内部求值器也用了类似的技术来避免变量名冲突。]
-]
-
-#slide[
-  == Nix 实现的 #lc;解释器
-  #v(0.6em)
-
-  #set text(size: 0.75em)
-  用 de Bruijn 指数实现：
-  #v(0.2em)
-  ```nix
-  let
-    Var  = index: { inherit index; type = "var"; };
-    Lam  = body: { inherit body;   type = "lam"; };
-    App  = func: arg: { inherit func arg; type = "app"; };
-  in ...
-  ```
-
-  #v(0.2em)
-  项的定义用 Nix attrset 表示：
-  #v(0.1em)
-  #align(center)[
-    #table(
-      columns: 3,
-      align: center,
-      stroke: 0.5pt + gray,
-      inset: (x: 6pt, y: 3pt),
-      table.header[*构造*][*语义*][*Nix*],
-      [`Var 0`], [当前绑定的变量], [`{ index = 0; type = "var"; }`],
-      [`Lam body`], [函数], [`{ body = ...; type = "lam"; }`],
-      [`App f x`], [函数应用], [`{ func = ...; arg = ...; type = "app"; }`],
-    )
-  ]
-]
-
-#slide[
-  == $beta$-归约实现
-  #v(0.8em)
-
-  #set text(size: 0.75em)
-  求值器遍历项，遇到 `App (Lam body) arg` 就替换：
-  #v(0.2em)
-  ```nix
-  substitute = term: value: depth:
-    if term.type == "var" then
-      if term.index == depth then value
-      else if term.index > depth then Var (term.index - 1)
-      else term
-    else if term.type == "lam" then
-      Lam (substitute term.body (shift value 1 0) (depth + 1))
-    else if term.type == "app" then
-      App (substitute term.func value depth)
-          (substitute term.arg value depth)
-    else term;
-  ```
-
-  #v(0.2em)
-  求值：
-  ```nix
-  eval = term: args:
-    if term.type == "app" then
-      eval term.func ([ term.arg ] ++ args)
-    else if term.type == "lam" && args != [] then
-      eval (substitute term.body (builtins.head args) 0)
-           (builtins.tail args)
-    else term;
-  ```
-
-  #v(0.2em)
-  #note[这是 β-归约的朴素实现，还有更高效的策略（如 Krivine machine）。]
-]
-
-#slide[
-  == 总结
-
-
-  + #lc;只有 *三条规则*：变量、抽象、应用
-  + *Church 编码*：用纯 $lambda$-项表示数据（bool、nat、pair、list...）
-  + *语法糖*：`let` 等价于 $lambda$-抽象 + 应用
-  + *形式语义*：$beta$-归约 + $alpha$-转换
-  + *求值顺序*：Nix 用惰性求值（call-by-need）
-  + *不动点*：$Y$ 组合子实现递归
-  + *Nix 库*：`rec`、`fix`、overlay、modules 全都是不动点
-
-  #v(0.6em)
-  #align(center)[
-    #block(inset: 10pt, stroke: 0.5pt + blue, radius: 6pt)[
-      Nix 语言 = #lc + bool + int + string + attrset + derivation \
-      学会了 #lc，就理解了 Nix 的核心。
-    ]
-  ]
 ]
