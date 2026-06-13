@@ -37,13 +37,6 @@
 
 // helper
 
-#let def(name, ..args) = {
-  let body = args.pos().first()
-  block(inset: 6pt, stroke: 0.5pt + gray, radius: 4pt, width: 100%)[
-    *#name：*#body
-  ]
-}
-
 #let note(body) = {
   text(size: 0.85em, fill: gray.darken(40%))[
     _#body _
@@ -605,7 +598,7 @@
   + 如果 $n$ 是 $m$ 的后继#footnote[即 $n = m + 1$。]，且 $code(m) f x = N$，$M = f N$。
 
   #note[
-    - 熟悉自然数的#link("https://en.wikipedia.org/wiki/Mathematical_induction")[数学归纳法]的同学会发现，这个跟它很像；并且还很熟悉 Rocq#footnote[Rocq 定理证明器，从前叫作 Coq。]的同学会发现，这个就是 `Nat` 的 #link("https://rocq-prover.org/doc/V9.2.0/refman/language/core/inductive.html#term-induction-principle")[induction priciples]。
+    - 熟悉自然数的#link("https://en.wikipedia.org/wiki/Mathematical_induction")[数学归纳法]的同学会发现，这个跟它很像；并且还很熟悉 Rocq#footnote[Rocq 定理证明器，从前叫作 Coq。]的同学会发现，这个就是 `Nat` 的 #link("https://rocq-prover.org/doc/V9.2.0/refman/language/core/inductive.html#term-induction-principle")[induction principles]。
     - 熟悉 #link("https://ncatlab.org/nlab/show/recursion+scheme")[recursion scheme] 的同学会发现，这个就是 #link("https://ncatlab.org/nlab/show/catamorphism")[catamorphism]。
   ]
 ]
@@ -1349,7 +1342,7 @@
   #align(center)[可以理解为：]
 
   ```nix
-  lib.fix (self: { a = 1; b = self.a; })
+  lib.fix (self: { a = 1; b = self.a + 1; })
   ```
 ]
 
