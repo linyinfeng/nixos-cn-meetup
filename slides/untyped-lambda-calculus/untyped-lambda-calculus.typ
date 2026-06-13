@@ -1456,8 +1456,8 @@
   看出来了吗？
 
   #later[
-    令 $M = f M = f (s s)$，我们有：
-    $ M = (lambda x. x x)(lambda s. f (s s)) = f M $
+    令 $M = f (s s)$，就有 $M = f (s s) = f M$：
+    $ M= (lambda x. x x)(lambda s. f (s s)) $
     $M$ 就是 $f$ 的不动点。
   ]
 ]
