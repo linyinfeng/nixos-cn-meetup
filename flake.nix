@@ -39,6 +39,7 @@
             env.FONTCONFIG_FILE = pkgs.makeFontsConf { fontDirectories = with pkgs; [ source-han-sans sarasa-gothic ]; };
             nativeBuildInputs = with pkgs; [
               typst
+              fd
             ];
           };
         };
