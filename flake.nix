@@ -22,6 +22,7 @@
         {
           self',
           pkgs,
+          lib,
           ...
         }:
         {
@@ -36,7 +37,7 @@
             };
           };
           devShells.default = pkgs.mkShell {
-            env.FONTCONFIG_FILE = pkgs.makeFontsConf { fontDirectories = with pkgs; [ source-han-sans sarasa-gothic ]; };
+            env.TYPST_FONT_PATHS = lib.concatStringsSep "," (with pkgs; [ source-han-sans sarasa-gothic ]);
             nativeBuildInputs = with pkgs; [
               typst
               fd
