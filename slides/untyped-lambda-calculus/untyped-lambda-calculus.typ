@@ -92,6 +92,29 @@
 )
 
 #slide[
+  == #lc; - 开始之前
+
+  #set text(size: 0.8em)
+
+  你可能想要：
+
+  #columns(2)[
+    #set align(center)
+    #image("images/this-slides.png", width: 7cm)
+
+    获取本幻灯片
+
+    #colbreak()
+
+    #image("images/lambdacalc-dev.png", width: 7cm)
+
+    在线#lc;解释器
+
+    #link("https://lambdacalc.dev")[lambdacalc.dev]
+  ]
+]
+
+#slide[
   #set align(horizon)
 
   #grid(columns: 2, gutter: 0.5cm)[
@@ -125,29 +148,6 @@
     ]
   ][
     也算是个研究程序设计语言的。
-  ]
-]
-
-#slide[
-  == #lc; - 开始之前
-
-  #set text(size: 0.8em)
-
-  你可能想要：
-
-  #columns(2)[
-    #set align(center)
-    #image("images/this-slides.png", width: 7cm)
-
-    获取本幻灯片
-
-    #colbreak()
-
-    #image("images/lambdacalc-dev.png", width: 7cm)
-
-    在线#lc;解释器
-
-    #link("https://lambdacalc.dev")[lambdacalc.dev]
   ]
 ]
 
