@@ -1195,10 +1195,10 @@
           step(beta) & f (f (Y f)) \
          steps(beta) & f (dots.c (f (Y f)) dots.c)
     $
-  ]
 
-  #note[
-    还有其他不动点组合子，比如 $Z$，用在 strict 的语言中。
+    #note[
+      还有其他不动点组合子，比如 $Z$，用在 strict 的语言中。
+    ]
   ]
 ]
 
