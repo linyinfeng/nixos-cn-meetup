@@ -2,7 +2,7 @@
 #import "@preview/simplebnf:0.2.0": Or, Prod, bnf
 #import "@preview/tdtr:0.5.5": tidy-tree-graph
 #import "@preview/ctheorems:1.1.3": thmrules
-#import "@preview/curryst:0.6.0": prooftree, rule, rule-set
+#import "@preview/curryst:0.6.0": prooftree, rule
 #import "@preview/fletcher:0.5.8": diagram, edge, node
 
 #set page(paper: "presentation-16-9")
