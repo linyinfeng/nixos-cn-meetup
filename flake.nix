@@ -38,7 +38,7 @@
           };
           devShells.default = pkgs.mkShell {
             env.TYPST_FONT_PATHS = lib.concatStringsSep ":" (with pkgs; [
-               "${source-han-sans}/share/fonts/opentype/source-han-sans"
+               "${source-han-sans}/share/fonts/truetype"
                "${sarasa-gothic}/share/fonts/truetype" ]);
             nativeBuildInputs = with pkgs; [
               typst
