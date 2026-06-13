@@ -1586,9 +1586,9 @@
 
   #set text(size: 0.9em)
 
-  或者说，如何在硬件上模拟 #lc;？
+  或者说，如何在硬件上运行 #lc;？
 
-  - 在操作语义中，#lc;的操作语义是用“替换”来实现的，但替换是语法的操作。
+  - 在操作语义中，#lc;的操作语义是用“替换”来实现的，但替换是纯语法的。
 
   - 另一种方式是使用类似 Python 或者 Scheme 的基于环境的语义#footnote[可见 #link("https://standards.scheme.org/corrected-r7rs/r7rs-Z-H-8.html#TAG:__tex2page_sec_6.12")[R7RS specification]。]。
 
