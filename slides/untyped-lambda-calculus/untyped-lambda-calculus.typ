@@ -1662,7 +1662,7 @@
 
   - 一种方式是继续使用基于环境的语义，但我们向值中加入所谓的“thunk” -- 延迟计算。
     $ (lambda x. M) N $
-    $N$ 被打包成一个 thunk $v$，对 $M$ 求值时，环境为 ${ x mapsto v }$。
+    $N$ 被打包成一个 thunk $t$，对 $M$ 求值时，环境为 ${ x mapsto t }$，当 $t$ 被使用时才求值 $N$。
 
   - 另一种方式是图规约，编译到 G-machine#footnote[感兴趣的同学可以学习 Simon Peyton Jones 的《Implementing functional languages: a tutorial》]及其衍生技术。
 
