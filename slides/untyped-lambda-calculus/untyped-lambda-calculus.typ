@@ -353,7 +353,7 @@
       [JavaScript], ```javascript function(x) { return M; }```,
       [JavaScript], ```javascript x => M```,
       [C++], ```cpp [](auto x) { return M; }```,
-      [Kotlin], ```kotlin fun(x) = M```,
+      [Kotlin], ```kotlin { x -> M }```,
       [Swift], ```swift  { x in M }```,
     )
   ]))
@@ -822,7 +822,7 @@
   $
   可以处理以下情形。
   $
-    dobeta((lambda y. x) y) step(beta) (lambda y. x)[y slash x] = & lambda y'. y \
+    dobeta((lambda x. lambda y. x) y) step(beta) (lambda y. x)[y slash x] = & lambda y'. y \
                                                                != & lambda y.y
   $
 ]
