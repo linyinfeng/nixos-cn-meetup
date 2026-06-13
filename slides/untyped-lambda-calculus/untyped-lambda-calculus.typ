@@ -1590,7 +1590,7 @@
 
   - 在操作语义中，#lc;的操作语义是用“替换”来实现的，但替换是语法的操作。
 
-  - 另一种方式使用是类似 Python 或者 Scheme 的基于环境的语义#footnote[可见 #link("https://standards.scheme.org/corrected-r7rs/r7rs-Z-H-8.html#TAG:__tex2page_sec_6.12")[R7RS specification]。]。
+  - 另一种方式是使用类似 Python 或者 Scheme 的基于环境的语义#footnote[可见 #link("https://standards.scheme.org/corrected-r7rs/r7rs-Z-H-8.html#TAG:__tex2page_sec_6.12")[R7RS specification]。]。
 
     #align(center)[
       $"Closure" = "Code" + "Environment"$
