@@ -18,8 +18,8 @@
 
 // codly
 
-#import "@preview/codly:1.3.0": *
-#import "@preview/codly-languages:0.1.10": *
+#import "@preview/codly:1.3.0": codly-init
+#import "@preview/codly-languages:0.1.10": codly-languages
 #show: codly-init.with()
 #let setup-codly() = {
   codly-reset()
