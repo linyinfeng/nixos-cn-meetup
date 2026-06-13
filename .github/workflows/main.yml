@@ -1,0 +1,52 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Install nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: Setup cachix
+        uses: cachix/cachix-action@v17
+        with:
+          name: linyinfeng
+          signingKey: "${{ secrets.CACHIX_SIGNING_KEY }}"
+      - name: Build
+        run: |
+          nix develop --command fd '.*\.typ' --exec typst compile --root '.' '{}'
+      - name: Copy and archive
+        run: |
+          mkdir public/slides
+          nix develop --command fd '.*\.pdf' slides --no-ignore --exec cp '{}' public/slides/
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: public
+          path: public
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    concurrency: deploy-${{ github.ref }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Download
+        uses: actions/download-artifact@v8
+        with:
+          name: public
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: public
