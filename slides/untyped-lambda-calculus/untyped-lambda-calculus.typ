@@ -124,7 +124,6 @@
       #link("https://github.com/linyinfeng")[github.com/linyinfeng]
     ]
   ][
-    #show link: set text(weight: "bold")
     也算是个研究程序设计语言的。
   ]
 ]
@@ -133,7 +132,6 @@
   == #lc; - 开始之前
 
   #set text(size: 0.8em)
-
 
   你可能想要：
 
@@ -186,7 +184,8 @@
       - Overlay & NixOS modules
     + 扩展知识
       + 不动点组合子
-      + 希尔伯特可判定性问题与\ 邱奇-图灵论题
+      + 希尔伯特可判定性问题与\
+        邱奇-图灵论题
       + #lc;的实现
   ]
 ]
@@ -210,14 +209,13 @@
         - 一种理想化的编程语言
         - 一个形式系统
         - 一种计算模型
-      - 阿隆佐·邱奇（Alonzo Church，1903--1995）在1930 年代提出
+      - 阿隆佐·邱奇（Alonzo Church，1903--1995）在 1930 年代提出
     ],
   )
 ]
 
 #slide[
   == #lc;简介
-
 
   作为一种理想化的程序设计语言，#lc;只有三种语法：
 
@@ -514,7 +512,7 @@
 #slide[
   == 用 #lc;编程 -- 邱奇编码 -- 布尔值 -- 构造与使用
 
-  #set text(0.9em)
+  #set text(size: 0.9em)
 
   邱奇编码的独特之处在于，构造出的数据结构用函数直接编码了“使用”。
 
@@ -1090,7 +1088,7 @@
 ]
 
 #slide[
-  == 不动点 =- $lambda$-项的等价关系
+  == 不动点 -- $lambda$-项的等价关系
 
   #set text(size: 0.85em)
 
@@ -1149,7 +1147,7 @@
 #slide[
   == 不动点 -- $lambda$-项的等价关系
 
-  #set text(0.9em)
+  #set text(size: 0.9em)
 
   换一种方式解释，这个等价关系描述了，只要两个 $lambda$-项，能求值成同一个项（包含 $alpha$-等价和外延性），那么它们就等价。因此这种等价是语义上的。
 
@@ -1349,7 +1347,7 @@
   整个 nixpkgs 其实就是由一堆 overlays 生成的#footnote[#link("https://github.com/NixOS/nixpkgs/blob/efde0aa842acd479121e85c3c86f58d6119d5bd3/pkgs/top-level/stage.nix#L312-L336")[nixos/nixpkgs - pkgs/top-level/stage.nix -- L312-L336]]。以下是经过修改便于理解的代码。
   ```nix
   let extends = f: overlay:
-        final: let prev = f final; prev // overlay final prev;
+        final: let prev = f final; in prev // overlay final prev;
       toFix = lib.foldl' extends (self: { }) allOverlays;
   in lib.fix toFix
   ```
