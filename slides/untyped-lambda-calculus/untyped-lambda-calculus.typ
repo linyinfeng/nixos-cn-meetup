@@ -18,7 +18,7 @@
 
 // codly
 
-#import "@preview/codly:1.3.0": codly-init
+#import "@preview/codly:1.3.0": codly-init, codly-reset, codly
 #import "@preview/codly-languages:0.1.10": codly-languages
 #show: codly-init.with()
 #let setup-codly() = {
@@ -26,6 +26,7 @@
   codly(languages: codly-languages)
   codly(zebra-fill: luma(250))
 }
+#setup-codly()
 
 // other
 
@@ -41,14 +42,6 @@
   text(size: 0.85em, fill: gray.darken(40%))[
     _#body _
   ]
-}
-
-#let point-explain(fill: blue.darken(40%), ..args, body) = {
-  pinit-point-from(
-    fill: fill,
-    ..args,
-    rect(fill: fill, radius: 0.25em, text(fill: white, body)),
-  )
 }
 
 #let syntax-tree(..args) = tidy-tree-graph(
@@ -82,7 +75,6 @@
   #body
 ]
 #let FV = $"FV"$
-#let substto = math.arrow.bar
 #let item-box(body, caption: none, ..args) = block(
   inset: 0.5em,
   stroke: 0.5pt + gray,
@@ -1356,7 +1348,7 @@
   ```
   整个 nixpkgs 其实就是由一堆 overlays 生成的#footnote[#link("https://github.com/NixOS/nixpkgs/blob/efde0aa842acd479121e85c3c86f58d6119d5bd3/pkgs/top-level/stage.nix#L312-L336")[nixos/nixpkgs - pkgs/top-level/stage.nix -- L312-L336]]。以下是经过修改便于理解的代码。
   ```nix
-  let extends = f: overlay
+  let extends = f: overlay:
         final: let prev = f final; prev // overlay final prev;
       toFix = lib.foldl' extends (self: { }) allOverlays;
   in lib.fix toFix
