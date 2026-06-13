@@ -3080,7 +3080,7 @@
   #columns(2)[
     #align(figure(caption: "库尔特·哥德尔")[
       #block(clip: true, radius: 10pt, image(
-        "images/kurt-gödel.jpg",
+        "images/kurt-godel.jpg",
         height: 70%,
       ))
     ])
