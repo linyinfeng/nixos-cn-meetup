@@ -783,7 +783,7 @@
     ))
   ]
 
-  - 应用 $(beta)$ 规则又被称为做 $beta$-规约（reduction），$(lambda x. M) N step(beta)$ 又被称为 $beta$-redex。不存在 redex 的表达式被称为规范形式（normal form）。
+  - 应用 $(beta)$ 规则又被称为做 $beta$-规约（reduction），$(lambda x. M) N$ 又被称为 $beta$-redex。不存在 redex 的表达式被称为规范形式（normal form）。
   - （Church-Rosser 定理）如果 $M steps(beta) M_1$ 和 $M steps(beta) M_2$，那么存在项 $N$，有 $M_1 steps(beta) N$ 和 $M_2 steps(beta) N$。
 ]
 
