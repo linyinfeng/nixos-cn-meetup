@@ -126,7 +126,7 @@
   #only(1)[
     Nix 客户端如何利用 HTTP binary cache？
 
-    + 当 Nix 要构建某个 derivation 的输出时，通常#footnote[非 content-addressed derivation] Nix 计算出输出的 store path，例如：
+    + 当 Nix 要构建某个 derivation 的输出时，通常#footnote[非 content-addressed derivation。] Nix 计算出输出的 store path，例如：
 
       ```console
       $ nix eval nixpkgs#hello^out --raw
@@ -145,7 +145,8 @@
       #align(center)[`/nix/store/`#example-hash`-hello-2.12.3`]
       中的 hash #example-hash 被认为是不会重复的，这是 binary cache 的索引。
 
-      Nix 随即尝试从 `substituters` 下载 #align(center)[#example-narinfo] 文件。
+      Nix 随即尝试从 `substituters` 下载以下文件：
+      #align(center)[#example-narinfo]
   ]
 
   #only(3)[
@@ -305,7 +306,7 @@
 
   2. narinfo 文件名：#text(fill: purple)[`i3zw7h6p...4v5w`]`.narinfo`
 
-  3. 通过 S3 `GetObject` 检查该文件是否存在
+  3. 通过 S3 `GetObject` 检查该文件是否存在（就是个 HTTP `GET`）
 
   #v(1em)
 
@@ -342,7 +343,7 @@
   ]
 
   #only(3)[
-    因为它只是一个简单的代理服务器，所以它直接支持 S3 multipart 上传，还可以直接支持上传构建日志等等特殊功能。
+    因为它只是一个简单的代理服务器，所以它兼容性拉满，直接支持 S3 multipart 上传，还可以直接支持上传构建日志等等特殊功能。
   ]
 ]
 
@@ -400,7 +401,7 @@
   #v(0.5em)
 
   #text(size: .95em)[
-    *注意*：`nix copy` 对 narinfo 查询的并发非常恐怖，建议把 overlay 部署在本地，不要通过反向代理访问，会把反代打爆。
+    *注意*：`nix copy` 对 narinfo 查询的并发非常恐怖，建议把 overlay 部署在本地，不要通过某些多进程架构的反向代理访问，会把反代打爆。
   ]
 
   ```log
@@ -455,9 +456,7 @@
   #v(1em)
   #set text(size: .85em)
 
-  做一个 tracing GC，解析 `narinfo` 文件获取依赖列表，递归找到所有可达的 store path。
-
-  典型的 narinfo 文件：
+  理论上，应该做一个 tracing GC，解析 `narinfo` 文件获取依赖列表，递归找到所有可达的 store path。典型的 narinfo 文件：
 
   ```plain
   StorePath: /nix/store/i3zw7h6p...-hello-2.12.2
@@ -501,9 +500,9 @@
 
   `nix-gc-s3` 和 `nix copy` *不应该同时运行*。
 
-  我一般在固定的 systemd 服务中运行这两个服务，脚本中使用 `flock` 加互斥锁。
+  我一般在固定的 systemd 服务中运行这两个服务，服务的脚本中使用 `flock` 加互斥锁。
 
-  正因如此，我的方案只适合由一台机器专门上传 binary cache 和做 GC。
+  正因如此，该方案只适合由一台机器专门跑 Hydra 上传 binary cache 和做 GC。
 ]
 
 #slide[
