@@ -31,7 +31,7 @@
 #let date = datetime(
   year: 2026,
   month: 6,
-  day: 13,
+  day: 14,
 )
 
 #slide[
@@ -91,7 +91,7 @@
 
   + #rainbow[*土制灵车*]
 
-  + *极低成本*：使用 Cloudflfare R2 等有免费额度的 S3 服务，每月 *0 USD*
+  + *极低成本*：使用 Cloudflare R2 等有免费额度的 S3 服务，每月 *0 USD*
 
   + *几乎 Serverless*：稳定，高性能，无服务器瓶颈
 
