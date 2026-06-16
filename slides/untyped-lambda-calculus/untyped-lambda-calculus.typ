@@ -4,6 +4,7 @@
 #import "@preview/ctheorems:1.1.3": thmrules
 #import "@preview/curryst:0.6.0": prooftree, rule
 #import "@preview/fletcher:0.5.8": diagram, edge, node
+#import "../common/common.typ": license
 
 #set page(paper: "presentation-16-9")
 #show heading: set block(below: 1em)
@@ -130,6 +131,8 @@
     #v(-0.5em)
     #date.display()
   ]
+
+  #license()
 ]
 
 #slide[

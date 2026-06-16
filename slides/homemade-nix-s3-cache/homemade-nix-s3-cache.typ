@@ -1,6 +1,7 @@
 #import "@preview/polylux:0.4.0": *
 #import "@preview/codly:1.3.0": *
 #import "@preview/codly-languages:0.1.10": *
+#import "../common/common.typ": license
 
 #set page(paper: "presentation-16-9")
 #set text(size: 23pt, font: ("Source Sans 3", "Source Han Sans SC"))
@@ -50,6 +51,8 @@
     #v(-0.5em)
     #date.display()
   ]
+
+  #license()
 ]
 
 #slide[

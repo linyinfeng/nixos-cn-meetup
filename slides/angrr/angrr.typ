@@ -2,6 +2,7 @@
 #import "@preview/cades:0.3.1": qr-code
 #import "@preview/codly:1.3.0": *
 #import "@preview/codly-languages:0.1.8": *
+#import "../common/common.typ": license
 
 #set page(paper: "presentation-16-9")
 #set text(size: 23pt, font: ("Source Sans 3", "Source Han Sans SC"))
@@ -48,6 +49,8 @@
 
     #date.display()
   ]
+
+  #license()
 ]
 
 #slide[
